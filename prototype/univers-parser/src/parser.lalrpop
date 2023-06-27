@@ -1,0 +1,64 @@
+use crate::ast::{
+  core::*,
+  types::*,
+  functions::*,
+  statements::*,
+};
+
+grammar;
+
+match {
+    // Skip comments
+    r"//[^\n\r]*[\n\r]*" => { },
+    r"/\*[^*]*\*+(?:[^/*][^*]*\*+)*/" => { },
+} else {
+    // Allow matching of other terminals
+    _
+}
+
+Identity: Identity<'input> =
+    @L r"[_a-zA-Z][_a-zA-Z0-9]*" @R =>
+      Identity::from(<>);
+
+// Helper taken from
+// https://github.com/lalrpop/lalrpop/blob/b777a6a884052d6283971f71b3ba453aa6d417ab/lalrpop/src/parser/lrgrammar.lalrpop#L447
+Comma<E>: Vec<E> =
+    <v0:(<E> ",")*> <e1:E?> =>
+        v0.into_iter().chain(e1).collect();
+
+Type: Type<'input> = {
+    <l:@L> <token: Identity> <r:@R> => 
+        TypeToken{ location: (l, r), token },
+
+    // lambda/function type annotation
+}
+
+TypeHint: Option<Type<'input>> = (":" <Type>)?;
+
+Parameter: Paramater<'input> = Identity TypeHint;
+
+Statement: Statement = {
+
+};
+
+Function: FunctionToken<'input> = {
+    // Parameters: fnc add(a, b) { return a + b }
+    <l: @L> "fnc" <name: Identity> "(" <parameters: Comma<Paramater>> ")" <return_type: TypeHint>
+    "{"
+        <body: Statement*> 
+    "}" <r: @R> =>
+        FunctionToken {
+            location: (l, r),
+            token: Function { name, parameters, return_type, body }
+        },
+
+    // No parameters: fnc f { }
+    <l: @L> "fnc" <name: Identity> <return_type: TypeHint> 
+    "{" 
+        <body: Statement*> 
+    "}" <r: @R> =>
+        FunctionToken {
+            location: (l, r),
+            token: Function { name, vec![], return_type, body }
+        },
+};
