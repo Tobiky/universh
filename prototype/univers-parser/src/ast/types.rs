@@ -1,9 +1,9 @@
 use super::core::Identity;
 
 pub struct FunctionTypes<'input> {
-    location: (usize, usize),
-    parameter_types: Vec<Type<'input>>,
-    return_type: Box<Type<'input>>,
+    pub location: (usize, usize),
+    pub parameter_types: Vec<Type<'input>>,
+    pub return_type: Box<Type<'input>>,
 }
 
 pub enum Type<'input> {
@@ -12,6 +12,6 @@ pub enum Type<'input> {
 }
 
 pub struct TypeToken<'input> {
-    location: (usize, usize),
-    token: Type<'input>
+    pub location: (usize, usize),
+    pub token: Type<'input>
 }

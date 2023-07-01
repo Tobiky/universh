@@ -1,13 +1,15 @@
+use super::statements::StatementToken;
+
+#[derive(Clone, Copy)]
 pub struct Identity<'input> {
-    location: (usize, usize),
-    id: &'input str,
+    pub location: (usize, usize),
+    pub id: &'input str,
 }
 
-impl<'input> From<(usize, &'input str, usize)> for Identity<'input> {
-    fn from(value: (usize, &'input str, usize)) -> Self {
-        Identity { 
-            location: (value.0, value.2),
-            id: value.1
-        }
+impl<'input> Identity<'input> {
+    fn from(left: usize, id: &'input str, right: usize) -> Self {
+        Identity { location: (left, right), id }
     }
 }
+
+pub type Program<'input> = Vec<StatementToken<'input>>;
