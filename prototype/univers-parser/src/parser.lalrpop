@@ -1,9 +1,9 @@
 use crate::ast::{
-  core::{Identity, Program},
-  types::{FunctionTypes, Type, TypeToken},
-  expressions::{LiteralToken, BinOp, UnOp, ExpressionToken, FunctionCallToken, MemberAccessToken},
-  functions::{Parameter, FunctionToken, CommandOptionType, CommandOptionTypeToken, CommandOptionToken, CommandToken},
-  statements::{Statement, StatementToken},
+  core::*,
+  types::*,
+  expressions::*,
+  functions::*,
+  statements::*,
 };
 
 grammar;
@@ -34,15 +34,9 @@ Type: Type<'input> = {
     // lambda/function type annotation
 }
 
-TypeHint: Option<Type<'input>> = (":" <Type>)?;
+TypeHint: Option<TypeToken<'input>> = (":" <Type>)?;
 
-Parameter: Parameter<'input> = Identity TypeHint => <>;
-
-BinOpExpression: ExpressionToken<'input> = {
-};
-
-UnOpExpression<>: ExpressionToken<'input> = {
-};
+Parameter: Parameter<'input> = Identity TypeHint;
 
 FunctionCall: FunctionCallToken<'input> = {
     <l: @L> <name: Identity> "(" <arguments: Comma<Expression>> ")" <r: @R> =>
@@ -227,43 +221,43 @@ Command: CommandToken<'input> = {
 
 
 AssignShortSyntax: StatementToken<'input> = {
-  <l: @L> <name: Identity> <lo: @L> "+=" <ro: @R> <e: Expression> <r: @R> => BinOp::Add.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "+=" <ro: @R> <e: Expression> <r: @R> => BinOp::Add.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "-=" <ro: @R> <e: Expression> <r: @R> => BinOp::Sub.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "-=" <ro: @R> <e: Expression> <r: @R> => BinOp::Sub.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "*=" <ro: @R> <e: Expression> <r: @R> => BinOp::Mul.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "*=" <ro: @R> <e: Expression> <r: @R> => BinOp::Mul.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "/=" <ro: @R> <e: Expression> <r: @R> => BinOp::Div.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "/=" <ro: @R> <e: Expression> <r: @R> => BinOp::Div.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "%=" <ro: @R> <e: Expression> <r: @R> => BinOp::Mod.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "%=" <ro: @R> <e: Expression> <r: @R> => BinOp::Mod.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "&=" <ro: @R> <e: Expression> <r: @R> => BinOp::LogicalAnd.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "&=" <ro: @R> <e: Expression> <r: @R> => BinOp::LogicalAnd.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "|=" <ro: @R> <e: Expression> <r: @R> => BinOp::LogicalOr.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "|=" <ro: @R> <e: Expression> <r: @R> => BinOp::LogicalOr.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "^=" <ro: @R> <e: Expression> <r: @R> => BinOp::LogicalXor.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "^=" <ro: @R> <e: Expression> <r: @R> => BinOp::LogicalXor.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "<<=" <ro: @R> <e: Expression> <r: @R> => BinOp::LeftShift.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "<<=" <ro: @R> <e: Expression> <r: @R> => BinOp::LeftShift.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> ">>=" <ro: @R> <e: Expression> <r: @R> => BinOp::RightShift.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> ">>=" <ro: @R> <e: Expression> <r: @R> => BinOp::RightShift.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "===" <ro: @R> <e: Expression> <r: @R> => BinOp::Equal.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "===" <ro: @R> <e: Expression> <r: @R> => BinOp::Equal.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "!==" <ro: @R> <e: Expression> <r: @R> => BinOp::NotEqual.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "!==" <ro: @R> <e: Expression> <r: @R> => BinOp::NotEqual.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> ">==" <ro: @R> <e: Expression> <r: @R> => BinOp::GreaterOrEqual.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> ">==" <ro: @R> <e: Expression> <r: @R> => BinOp::GreaterOrEqual.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "<==" <ro: @R> <e: Expression> <r: @R> => BinOp::LessOrEqual.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "<==" <ro: @R> <e: Expression> <r: @R> => BinOp::LessOrEqual.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "<=" <ro: @R> <e: Expression> <r: @R> => BinOp::Less.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "<=" <ro: @R> <e: Expression> <r: @R> => BinOp::Less.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> ">=" <ro: @R> <e: Expression> <r: @R> => BinOp::Greater.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> ">=" <ro: @R> <e: Expression> <r: @R> => BinOp::Greater.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "&&=" <ro: @R> <e: Expression> <r: @R> => BinOp::BooleanAnd.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "&&=" <ro: @R> <e: Expression> <r: @R> => BinOp::BooleanAnd.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "||=" <ro: @R> <e: Expression> <r: @R> => BinOp::BooleanOr.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "||=" <ro: @R> <e: Expression> <r: @R> => BinOp::BooleanOr.assign_statement(<>),
 
-  <l: @L> <name: Identity> <lo: @L> "^^=" <ro: @R> <e: Expression> <r: @R> => BinOp::BooleanXor.assign_statement(l, name, lo, ro, e, r),
+  <l: @L> <name: Identity> <lo: @L> "^^=" <ro: @R> <e: Expression> <r: @R> => BinOp::BooleanXor.assign_statement(<>),
 }
 
 BaseStatement: StatementToken<'input> = {
