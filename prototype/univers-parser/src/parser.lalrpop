@@ -39,63 +39,9 @@ TypeHint: Option<Type<'input>> = (":" <Type>)?;
 Parameter: Parameter<'input> = Identity TypeHint => <>;
 
 BinOpExpression: ExpressionToken<'input> = {
-    // * / %
-    #[precedence(level="0")]
-  <l: @L> <e1: Expression> <lo: @L> "*" <ro: @R> <e2: Expression> <r: @R> => BinOp::Mul.expression(l, e, lo, ro, e2, r),
-  <l: @L> <e1: Expression> <lo: @L> "/" <ro: @R> <e2: Expression> <r: @R> => BinOp::Div.expression(l, e, lo, ro, e2, r),
-  <l: @L> <e1: Expression> <lo: @L> "%" <ro: @R> <e2: Expression> <r: @R> => BinOp::Mod.expression(l, e, lo, ro, e2, r),
-
-    // + -
-    #[precedence(level="1")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> "+" <ro: @R> <e2: Expression> <r: @R> => BinOp::Add.expression(l, e, lo, ro, e2, r),
-  <l: @L> <e1: Expression> <lo: @L> "-" <ro: @R> <e2: Expression> <r: @R> => BinOp::Sub.expression(l, e, lo, ro, e2, r),
-
-    // << >>
-    #[precedence(level="2")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> ">>" <ro: @R> <e2: Expression> <r: @R> => BinOp::RightShift.expression(l, e, lo, ro, e2, r),
-  <l: @L> <e1: Expression> <lo: @L> "<<" <ro: @R> <e2: Expression> <r: @R> => BinOp::LeftShift.expression(l, e, lo, ro, e2, r),
-
-    // < > <= >=
-    #[precedence(level="3")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> "<" <ro: @R> <e2: Expression> <r: @R> => BinOp::Less.expression(l, e, lo, ro, e2, r),
-  <l: @L> <e1: Expression> <lo: @L> ">" <ro: @R> <e2: Expression> <r: @R> => BinOp::Greater.expression(l, e, lo, ro, e2, r),
-  <l: @L> <e1: Expression> <lo: @L> "<=" <ro: @R> <e2: Expression> <r: @R> => BinOp::LessOrEqual.expression(l, e, lo, ro, e2, r),
-  <l: @L> <e1: Expression> <lo: @L> ">=" <ro: @R> <e2: Expression> <r: @R> => BinOp::GreaterOrEqual.expression(l, e, lo, ro, e2, r),
-
-    // != ==
-    #[precedence(level="4")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> "!=" <ro: @R> <e2: Expression> <r: @R> => BinOp::NotEqual.expression(l, e, lo, ro, e2, r),
-  <l: @L> <e1: Expression> <lo: @L> "==" <ro: @R> <e2: Expression> <r: @R> => BinOp::Equal.expression(l, e, lo, ro, e2, r),
-
-    // &
-    #[precedence(level="5")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> "&" <ro: @R> <e2: Expression> <r: @R> => BinOp::LogicalAnd.expression(l, e, lo, ro, e2, r),
-
-    // ^
-    #[precedence(level="6")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> "^" <ro: @R> <e2: Expression> <r: @R> => BinOp::LogicalXor.expression(l, e, lo, ro, e2, r),
-
-    // |
-    #[precedence(level="7")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> "|" <ro: @R> <e2: Expression> <r: @R> => BinOp::LogicalOr.expression(l, e, lo, ro, e2, r),
-
-    // &&
-    #[precedence(level="8")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> "&&" <ro: @R> <e2: Expression> <r: @R> => BinOp::BooleanAnd.expression(l, e, lo, ro, e2, r),
-
-    // ^^
-    #[precedence(level="9")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> "^^" <ro: @R> <e2: Expression> <r: @R> => BinOp::BooleanXor.expression(l, e, lo, ro, e2, r),
-
-    // ||
-    #[precedence(level="10")] #[assoc(side="left")]
-  <l: @L> <e1: Expression> <lo: @L> "||" <ro: @R> <e2: Expression> <r: @R> => BinOp::BooleanOr.expression(l, e, lo, ro, e2, r),
 };
 
-UnOpExpression: ExpressionToken<'input> = {
-  <l: @L> "!" <ro: @R> <e: Expression> <r: @R> => UnOp::BooleanNot.expression(l, ro, e, r),
-  <l: @L> "-" <ro: @R> <e: Expression> <r: @R> => UnOp::Negative.expression(l, ro, e, r),
-  <l: @L> "~" <ro: @R> <e: Expression> <r: @R> => UnOp::LogicalInverse.expression(l, ro, e, r),
+UnOpExpression<>: ExpressionToken<'input> = {
 };
 
 FunctionCall: FunctionCallToken<'input> = {
@@ -149,17 +95,67 @@ LiteralExpression: ExpressionToken<'input> = {
 };
 
 Expression: ExpressionToken<'input> = {
-    #[precedence(level="0")]
+#[precedence(level="0")]
     RecursiveExpression,
     LiteralExpression,
 
-    #[precedence(level="1")]
-    #[assoc(side="right")]
-    UnOpExpression,
+#[precedence(level="1")] #[assoc(side="right")]
+    <l: @L> "!" <ro: @R> <e: Expression> <r: @R> => UnOp::BooleanNot.expression(<>),
+    <l: @L> "-" <ro: @R> <e: Expression> <r: @R> => UnOp::Negative.expression(<>),
+    <l: @L> "~" <ro: @R> <e: Expression> <r: @R> => UnOp::LogicalInverse.expression(<>),
 
-    #[precedence(level="2")]
-    BinOpExpression,
-};
+    // * / %
+#[precedence(level="2")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "*" <ro: @R> <e2: Expression> <r: @R> => BinOp::Mul.expression(<>),
+    <l: @L> <e1: Expression> <lo: @L> "/" <ro: @R> <e2: Expression> <r: @R> => BinOp::Div.expression(<>),
+    <l: @L> <e1: Expression> <lo: @L> "%" <ro: @R> <e2: Expression> <r: @R> => BinOp::Mod.expression(<>),
+
+    // + -
+#[precedence(level="3")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "+" <ro: @R> <e2: Expression> <r: @R> => BinOp::Add.expression(<>),
+    <l: @L> <e1: Expression> <lo: @L> "-" <ro: @R> <e2: Expression> <r: @R> => BinOp::Sub.expression(<>),
+
+    // << >>
+#[precedence(level="4")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> ">>" <ro: @R> <e2: Expression> <r: @R> => BinOp::RightShift.expression(<>),
+    <l: @L> <e1: Expression> <lo: @L> "<<" <ro: @R> <e2: Expression> <r: @R> => BinOp::LeftShift.expression(<>),
+
+    // < > <= >=
+#[precedence(level="5")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "<" <ro: @R> <e2: Expression> <r: @R> => BinOp::Less.expression(<>),
+    <l: @L> <e1: Expression> <lo: @L> ">" <ro: @R> <e2: Expression> <r: @R> => BinOp::Greater.expression(<>),
+    <l: @L> <e1: Expression> <lo: @L> "<=" <ro: @R> <e2: Expression> <r: @R> => BinOp::LessOrEqual.expression(<>),
+    <l: @L> <e1: Expression> <lo: @L> ">=" <ro: @R> <e2: Expression> <r: @R> => BinOp::GreaterOrEqual.expression(<>),
+
+    // != ==
+#[precedence(level="6")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "!=" <ro: @R> <e2: Expression> <r: @R> => BinOp::NotEqual.expression(<>),
+    <l: @L> <e1: Expression> <lo: @L> "==" <ro: @R> <e2: Expression> <r: @R> => BinOp::Equal.expression(<>),
+
+    // &
+#[precedence(level="7")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "&" <ro: @R> <e2: Expression> <r: @R> => BinOp::LogicalAnd.expression(<>),
+
+    // ^
+#[precedence(level="8")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "^" <ro: @R> <e2: Expression> <r: @R> => BinOp::LogicalXor.expression(<>),
+
+    // |
+#[precedence(level="9")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "|" <ro: @R> <e2: Expression> <r: @R> => BinOp::LogicalOr.expression(<>),
+
+    // &&
+#[precedence(level="10")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "&&" <ro: @R> <e2: Expression> <r: @R> => BinOp::BooleanAnd.expression(<>),
+
+    // ^^
+#[precedence(level="11")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "^^" <ro: @R> <e2: Expression> <r: @R> => BinOp::BooleanXor.expression(<>),
+
+    // ||
+#[precedence(level="12")] #[assoc(side="left")]
+    <l: @L> <e1: Expression> <lo: @L> "||" <ro: @R> <e2: Expression> <r: @R> => BinOp::BooleanOr.expression(<>),
+            };
 
 Function: FunctionToken<'input> = {
   // Parameters: fnc add(a, b) { return a + b }
