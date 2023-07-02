@@ -1,10 +1,10 @@
-use super::{types::Type, core::Identity, statements::Statement, expressions::ExpressionToken};
+use super::{types::TypeToken, core::Identity, statements::Statement, expressions::ExpressionToken};
 
-pub type Parameter<'input> = (Identity<'input>, Option<Type<'input>>);
+pub type Parameter<'input> = (Identity<'input>, Option<TypeToken<'input>>);
 
 pub struct FunctionToken<'input> {
     pub location: (usize, usize),
-    pub return_type: Option<Type<'input>>,
+    pub return_type: Option<TypeToken<'input>>,
     pub parameters: Vec<Parameter<'input>>,
     pub name: Identity<'input>,
     pub body: Vec<Statement<'input>>

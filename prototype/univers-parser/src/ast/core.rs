@@ -7,7 +7,7 @@ pub struct Identity<'input> {
 }
 
 impl<'input> Identity<'input> {
-    fn from(left: usize, id: &'input str, right: usize) -> Self {
+    pub fn new(left: usize, id: &'input str, right: usize) -> Self {
         Identity { location: (left, right), id }
     }
 }
