@@ -76,11 +76,12 @@ RecursiveExpression: ExpressionToken<'input> = {
             token: Expression<'input>::Call(call),
         },
     
-    <l: @L> <access: MemberAccess> <r: @R> =>
-        ExpressionToken<'input> {
-            location: (l, r),
-            token: Expression<'input>::MemberAccess(access),
-        },
+    // FIXME: Hangs
+    // <l: @L> <access: MemberAccess> <r: @R> =>
+    //     ExpressionToken<'input> {
+    //         location: (l, r),
+    //         token: Expression<'input>::MemberAccess(access),
+    //     },
 };
 
 // Literals
