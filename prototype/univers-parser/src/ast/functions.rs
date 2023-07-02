@@ -1,4 +1,4 @@
-use super::{types::TypeToken, core::Identity, statements::Statement, expressions::ExpressionToken};
+use super::{types::TypeToken, core::Identity, statements::StatementToken, expressions::ExpressionToken};
 
 pub type Parameter<'input> = (Identity<'input>, Option<TypeToken<'input>>);
 
@@ -7,7 +7,7 @@ pub struct FunctionToken<'input> {
     pub return_type: Option<TypeToken<'input>>,
     pub parameters: Vec<Parameter<'input>>,
     pub name: Identity<'input>,
-    pub body: Vec<Statement<'input>>
+    pub body: Vec<StatementToken<'input>>
 }
 
 pub enum CommandOptionType {
@@ -32,5 +32,5 @@ pub struct CommandToken<'input> {
     pub name: Identity<'input>,
     pub options: Vec<CommandOptionToken<'input>>,
     pub rest_variable: Option<Identity<'input>>,
-    pub body: Vec<Statement<'input>>,
+    pub body: Vec<StatementToken<'input>>,
 }

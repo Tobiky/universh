@@ -24,12 +24,15 @@ Identity: Identity<'input> =
 // Helper taken from
 // https://github.com/lalrpop/lalrpop/blob/b777a6a884052d6283971f71b3ba453aa6d417ab/lalrpop/src/parser/lrgrammar.lalrpop#L447
 Comma<E>: Vec<E> =
-    <v0:(<E> ",")*> <e1:E?> ","? =>
+    <v0:(<E> ",")*> <e1:E?> =>
         v0.into_iter().chain(e1).collect();
 
-Type: Type<'input> = {
+Type: TypeToken<'input> = {
     <l:@L> <token: Identity> <r:@R> => 
-        TypeToken{ location: (l, r), token },
+        TypeToken {
+            location: (l, r),
+            token: Type::Identity(token)
+        },
 
     // lambda/function type annotation
 }
@@ -40,29 +43,27 @@ Parameter: Parameter<'input> = Identity TypeHint;
 
 FunctionCall: FunctionCallToken<'input> = {
     <l: @L> <name: Identity> "(" <arguments: Comma<Expression>> ")" <r: @R> =>
-      Expression<'input>::Call(
-          FunctionCallToken<'input> {
-              location: (l, r),
-              name,
-              arguments
-          }
-      )
+      FunctionCallToken {
+          location: (l, r),
+          name,
+          arguments
+      }
 };
 
 MemberAccess: MemberAccessToken<'input> = {
     <l: @L> <source: Expression> "." <function: FunctionCall> <r: @R> =>
-        MemberAccessToken<'input> { 
+        MemberAccessToken { 
             location: (l, r),
             source: Box::new(source),
-            access: MemberAccess<'input>::Function(function)
+            access: MemberAccess::Function(function)
         },
 
 
     <l: @L> <source: Expression> "." <field: Identity> <r: @R> =>
-        MemberAccessToken<'input> { 
+        MemberAccessToken { 
             location: (l, r),
             source: Box::new(source),
-            access: MemberAccess<'input>::Field(field)
+            access: MemberAccess::Field(field)
         },
 };
 
@@ -71,16 +72,16 @@ RecursiveExpression: ExpressionToken<'input> = {
     "(" <Expression> ")",
 
     <l: @L> <call: FunctionCall> <r: @R> =>
-        ExpressionToken<'input> {
+        ExpressionToken {
             location: (l, r),
-            token: Expression<'input>::Call(call),
+            token: Expression::Call(call),
         },
     
     // FIXME: Hangs
     // <l: @L> <access: MemberAccess> <r: @R> =>
-    //     ExpressionToken<'input> {
+    //     ExpressionToken {
     //         location: (l, r),
-    //         token: Expression<'input>::MemberAccess(access),
+    //         token: Expression::MemberAccess(access),
     //     },
 };
 
@@ -203,7 +204,7 @@ CommandOption: CommandOptionToken<'input> = {
 };
 
 Command: CommandToken<'input> = {
-  <l: @L> "cmd" <name: Identity> "with" <options: Comma<CommandOption>> <rest_variable: ("rest" <Identity>)> "{" <body: Statement*> "}" <r: @R> => CommandToken{
+  <l: @L> "cmd" <name: Identity> "with" <options: Comma<CommandOption>> <rest_variable: ("rest" <Identity>)?> "{" <body: Statement*> "}" <r: @R> => CommandToken{
     location: (l, r),
     name,
     options,
@@ -215,7 +216,7 @@ Command: CommandToken<'input> = {
     location: (l, r),
     name,
     options: vec![],
-    rest_variable,
+    rest_variable: Some(rest_variable),
     body
   }
 };
@@ -263,7 +264,7 @@ AssignShortSyntax: StatementToken<'input> = {
 
 BaseStatement: StatementToken<'input> = {
     <l: @L> <var: Identity> "=" <val: Expression> <r: @R> =>
-        StatementToken<'input> {
+        StatementToken {
             location: (l, r),
             token: Statement::Assign(var, val),
         },
@@ -271,21 +272,21 @@ BaseStatement: StatementToken<'input> = {
     AssignShortSyntax,
 
     <l: @L> <e: Expression> <r: @R> =>
-        StatementToken<'input> {
+        StatementToken {
             location: (l, r),
-            token: Statement<'input>::Expression(e),
+            token: Statement::Expression(e),
         },
-    
+
     <l: @L> <f: Function> <r: @R> => 
-        StatementToken<'input> {
+        StatementToken {
             location: (l, r),
-            token: Statement<'input>::FunctionDeclaration(f),
+            token: Statement::FunctionDeclaration(f),
         },
-    
+
     <l: @L> <c: Command> <r: @R> => 
-        StatementToken<'input> {
+        StatementToken {
             location: (l, r),
-            token: Statement<'input>::CommandDeclaration(c),
+            token: Statement::CommandDeclaration(c),
         },
 };
 
