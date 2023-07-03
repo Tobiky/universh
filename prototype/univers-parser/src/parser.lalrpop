@@ -31,7 +31,7 @@ Type: TypeToken<'input> = {
     <l:@L> <token: Identity> <r:@R> => 
         TypeToken {
             location: (l, r),
-            token: Type::Identity(token)
+            token: Type::Named(token)
         },
 
     // lambda/function type annotation
@@ -77,17 +77,25 @@ RecursiveExpression: ExpressionToken<'input> = {
             token: Expression::Call(call),
         },
     
-    // FIXME: Hangs
-    // <l: @L> <access: MemberAccess> <r: @R> =>
-    //     ExpressionToken {
-    //         location: (l, r),
-    //         token: Expression::MemberAccess(access),
-    //     },
+    // FIXME: hangs
+    <l: @L> <access: MemberAccess> <r: @R> =>
+        ExpressionToken {
+            location: (l, r),
+            token: Expression::MemberAccess(access),
+        },
 };
 
 // Literals
 LiteralExpression: ExpressionToken<'input> = {
+    <l: @L> <s: r"\d+"> <r: @R> => 
+        ExpressionToken::literal_at(l, s, "int", r),
 
+    <l: @L> <s: r"\d*\.\d*"> <r: @R> => 
+        ExpressionToken::literal_at(l, s, "float", r),
+
+    // FIXME: only " ' \ n t allowed escape sequences currently
+    <l: @L> <s: r#""(?:[ -~&&[^'"\\]]|\\['"nt\\])*""#> <r: @R> => 
+        ExpressionToken::literal_at(l, s, "str", r),
 };
 
 Expression: ExpressionToken<'input> = {

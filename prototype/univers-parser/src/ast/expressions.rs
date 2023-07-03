@@ -1,10 +1,32 @@
-use super::{core::Identity, statements::{Statement, StatementToken}};
+use super::{core::Identity, statements::{Statement, StatementToken}, types::TypeToken};
 
 pub struct LiteralToken<'input> {
     pub location: (usize, usize),
     pub value: &'input str,
-    // FIXME: injecting a type (e.g. syntax sugar) will not work
-    pub literal_type: Identity<'input>,
+    pub literal_type: TypeToken<'input>,
+}
+
+impl<'input> LiteralToken<'input> {
+    pub fn at(
+        left: usize,
+        value: &'input str,
+        literal_type: TypeToken<'input>,
+        right: usize) -> Self 
+    {
+        LiteralToken {
+            location: (left, right),
+            value,
+            literal_type,
+        }
+    }
+
+    pub fn new(
+        value: &'input str,
+        literal_type: TypeToken<'input>) -> Self
+    {
+        Self::at(0, value, literal_type, 0)
+    }
+
 }
 
 pub enum BinOp {
@@ -65,7 +87,7 @@ impl<'input> BinOp {
         StatementToken {
             location: (left, right),
             token: Statement::Assign(
-                name,
+                name.clone(),
                 self.expression(
                     left, 
                     ExpressionToken {
@@ -156,4 +178,27 @@ pub enum Expression<'input> {
 pub struct ExpressionToken<'input> {
     pub location: (usize, usize),
     pub token: Expression<'input>
+}
+
+impl<'input> ExpressionToken<'input> {
+    pub fn literal_at(
+        left: usize,
+        token: &'input str,
+        token_type: &'input str,
+        right: usize
+    ) -> Self
+    {
+        Self {
+            location: (left, right),
+            token: Expression::Literal(
+                LiteralToken::at(
+                    left,
+                    token,
+                    TypeToken::named_at(
+                        left,
+                        token_type,
+                        right),
+                    right))
+        }
+    }
 }
